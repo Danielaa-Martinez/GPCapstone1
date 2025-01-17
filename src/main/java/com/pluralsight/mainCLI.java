@@ -1,11 +1,14 @@
 package com.pluralsight;
 
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+
+import static com.pluralsight.reportsLogic.reader;
 
 public class mainCLI {
 
@@ -150,4 +153,41 @@ public class mainCLI {
                 while (option[0] != 'X') ;
                 scanner.close();
             }
-        }
+    public static void displayReports() throws FileNotFoundException {
+        String reportOptions;
+        // another do while loop, will run unless 0 is selected
+        do {
+            System.out.println("Welcome to your reports. Please select one of the following options: " +
+                    "\n" + "1 - Month to Date" +
+                    "\n" + "2 - Previous Month" +
+                    "\n" + "3 - Year to Date" +
+                    "\n" + "4 - Previous Year" +
+                    "\n" + "5 - Search by Vendor" +
+                    "\n" + "0 - Back");
+
+            reportOptions = reader.nextLine();
+            // reader.nextLine();
+            switch (reportOptions) {
+                case "1":
+                    reportsLogic.displayMonthToDate();
+                    break;
+                case "2":
+                    reportsLogic.displayPreviousMonth();
+                    break;
+                case "3":
+                    reportsLogic.displayYearToDate();
+                    break;
+                case "4":
+                    reportsLogic.displayPreviousYear();
+                    break;
+                case "5":
+                    reportsLogic.searchVendor();
+                    break;
+                case "0":
+                    break;
+                default:
+                    System.out.println("That is not a valid selection. Please try again.");
+            }
+        } while (!reportOptions.equals("0"));
+    }
+}

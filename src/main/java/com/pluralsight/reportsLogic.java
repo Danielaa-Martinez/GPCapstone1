@@ -1,62 +1,160 @@
 package com.pluralsight;
 
-import java.util.List;
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Scanner;
-import java.util.stream.Collectors;
 
-    public class reportsLogic {
+//copied and pasted from Maya
+public class reportsLogic {
+    static Scanner reader = new Scanner(System.in);
+    static DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    //static LocalTime timeToday = LocalTime.now();
+    //static LocalDate dateToday = LocalDate.now();
+    //static DateTimeFormatter tf = DateTimeFormatter.ofPattern("HH:mm:ss");
+    //static String date = dateToday.format(df);
+    // static String time = timeToday.format(tf);
 
-        //Month-to-date
-        public static List<transaction> generateMonthtoDateReport(List<transaction> transactions) {
-            LocalDate today = LocalDate.now();
-            LocalDate startOfMonth = today.withDayOfMonth(1);
-            return generateReportByDateRange(transactions, startOfMonth, today);
-        }
+    public static void displayReports() throws FileNotFoundException {
+        String reportOptions;
+        do {
+            System.out.println("Welcome to your reports. Please select one of the following options: " +
+                    "\n" + "1 - Month to Date" +
+                    "\n" + "2 - Previous Month" +
+                    "\n" + "3 - Year to Date" +
+                    "\n" + "4 - Previous Year" +
+                    "\n" + "5 - Search by Vendor" +
+                    "\n" + "0 - Back");
+            reportOptions = reader.nextLine();
+            // reader.nextLine();
+            switch (reportOptions) {
+                case "1":
+                    displayMonthToDate();
+                    break;
+                case "2":
+                    displayPreviousMonth();
+                    break;
+                case "3":
+                    displayYearToDate();
+                    break;
+                case "4":
+                    displayPreviousYear();
+                    break;
+                case "5":
+                    searchVendor();
+                    break;
+                case "0":
+                    break;
+                default:
+                    System.out.println("That is not a valid selection. Please try again.");
+            }
+        } while (!reportOptions.equals("0"));
+    }
 
-        //Year-to-date
-        public static List<transaction> generateMonthtoDateReport(List<transaction> transactions) {
-            LocalDate today = LocalDate.now();
-            LocalDate startOfYear = today.withDayOfYear(1);
-            return generateReportByDateRange(transactions, startOfYear, today);
-
-
-            //And now to bring it all together in one document... hopefully.
-            public static void displayReport (List <transaction> filteredTransactions);
-            if (filteredTransactions.isEmpty()) {
-                System.out.println("No transactions found for the specified range.");
-            } else {
-                for (Transaction transaction : filteredTransactions) {
-                    System.out.println(transaction);
-
-                    //Vendor searching now. Fancy.
-                    class TransactionSearch {
-
-                        public static List<Transaction> generateReportByVendor(List<Transaction> transactions, String vendorName) {
-                            return transactions.stream()
-                                    .filter(t -> t.getVendor().equalsIgnoreCase(vendorName))
-                                    .collect(Collectors.toList());
-
-                            //Back to more familiar waters.
-                            public static void searchAndDisplayByVendor (List <transaction> transactions) {
-                                Scanner scanner = new Scanner(System.in);
-                                System.out.println("Enter the vendor's name to start your search: ");
-                                vendorName = scanner.nextLine();
-
-                                //Oh how I've missed the if/else statements.
-                                List<Transaction> matchingTransactions = generateReportByVendor(transactions, vendorName);
-                                if (matchingTransactions.isEmpty()) {
-                                    System.out.println("No transactions found for the vendor: " + vendorName + "were found. Please try again.");
-                                } else {
-                                    System.out.println("Transactions for vendor: " + vendorName);
-                                    for (Transaction transaction : matchingTransactions) {
-                                        System.out.println(transaction);
-                                    }
-                                }
-                            }
-                        }
-                    }
+    public static void searchVendor() {
+        System.out.println("Please enter the vendor here:");
+        String vendorSearch = reader.nextLine();
+        try {
+            BufferedReader bufReader = new BufferedReader(new FileReader("transactions.csv"));
+            String input = bufReader.readLine();
+            while ((input = bufReader.readLine()) != null) {
+                //splitting the fields just to get the vendor
+                String[] splittingFields = input.split("\\|");
+                String vendor = splittingFields[3];
+                // if statement so that only entries that are equal to the vendor are returned
+                if (vendor.equalsIgnoreCase(vendorSearch)) {
+                    System.out.println(input);
                 }
             }
+            bufReader.close();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
+
+    public static void displayMonthToDate() throws FileNotFoundException {
+        try {
+            BufferedReader bufReader = new BufferedReader(new FileReader("transactions.csv"));
+            String input = bufReader.readLine();
+            while ((input = bufReader.readLine()) != null) {
+                String[] splittingFields = input.split("\\|");
+                String splitDate = splittingFields[0];
+                LocalDate date = LocalDate.parse(splitDate, df);
+                if ((date.getMonth() == LocalDate.now().getMonth() && date.getYear() == LocalDate.now().getYear())) {
+                    System.out.println(input);
+                }
+            }
+            bufReader.close();
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static void displayPreviousMonth() {
+        try {
+            BufferedReader bufReader = new BufferedReader(new FileReader("transactions.csv"));
+            String input = bufReader.readLine();
+            // creating variable for the previous month
+            LocalDate previousMonth = LocalDate.now().minusMonths(1);
+            while ((input = bufReader.readLine()) != null) {
+                String[] splittingFields = input.split("\\|");
+                String splitDate = splittingFields[0];
+                LocalDate date = LocalDate.parse(splitDate, df);
+                // only entries where the month equals the previous month and year
+                if ((date.getMonth() == previousMonth.getMonth() && date.getYear() == previousMonth.getYear())) {
+                    System.out.println(input);
+                }
+            }
+            bufReader.close();
+
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static void displayYearToDate() {
+        try {
+            BufferedReader bufReader = new BufferedReader(new FileReader("transactions.csv"));
+            String input = bufReader.readLine();
+            LocalDate Year = LocalDate.now();
+            while ((input = bufReader.readLine()) != null) {
+                String[] splittingFields = input.split("\\|");
+                String splitDate = splittingFields[0];
+                LocalDate date = LocalDate.parse(splitDate, df);
+                // only displays entries of the current year
+                if ((date.getYear() == Year.getYear())) {
+                    System.out.println(input);
+                }
+            }
+            bufReader.close();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static void displayPreviousYear() {
+        try {
+            BufferedReader bufReader = new BufferedReader(new FileReader("transactions.csv"));
+            String input = bufReader.readLine();
+            // creating variable for the previous year
+            LocalDate previousYear = LocalDate.now().minusYears(1);
+            while ((input = bufReader.readLine()) != null) {
+                String[] splittingFields = input.split("\\|");
+                String splitDate = splittingFields[0];
+                LocalDate date = LocalDate.parse(splitDate, df);
+                // only if the year equals the previous year, the entry will be shown
+                if ((date.getYear() == previousYear.getYear())) {
+                    System.out.println(input);
+                }
+            }
+            bufReader.close();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+}

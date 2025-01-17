@@ -119,7 +119,7 @@ import java.util.*;
                     }
 
                     // Adds a deposit and a payment transaction to the list
-                    public static void addTransactions(List<Transaction> transactions, TransactionHandler handler) {
+                    public static void addTransactions(List<Transaction> transactions, Transaction handler) {
                         Transaction deposit = handler.addDeposit();
                         transactions.add(deposit);
 
